@@ -1,1 +1,94 @@
 # carbontracker
+* Transportation Mode Classification Detection
+** Machine Learning
+*** Data visualization
+Data processing and visualization is done via python scripts. In order to have
+everything working, you must have the following dependencies installed:
+
++ =bokeh=: visualization library
++ =pandas=: processing and querying csv data
++ =tqdm=: displaying a progress bar
+
+You can install all these packages using =conda=:
+#+BEGIN_SRC
+conda install bokeh pandas tqdm
+#+END_SRC
+
+*** Data Processing
+To visualize the data, first process it. This can be done using the
+=process_data.py= script. It will parse the =legs.csv= folder, extract all the
+user ids, then ask which user you would like to process. Then it will ask which
+journey of the selected user you would like to process. You can of course both
+times say all.
+
+It will then output the sensor data in one csv file per user and per journey, in
+the =processed_data= folder (which will be created if necessary). This folder
+follows the following hierarchy:
+
++ =./processed_data=
+  + =user_id=
+    + =leg_id=
+      + =acc_readings.csv=
+      + =bluetooth_scans.csv=
+      + =gyro_readings.csv=
+      + =locations_scans.csv==
+      + =magn_readings.csv=
+      + =wifi_scans.csv=
+
+To start processing the data, call:
+#+BEGIN_SRC
+python process_data.py
+#+END_SRC
+       
+*** Data Visualization
+Once the data has been processes, visualizing it can be done via the
+=visualization.py= script. The script will first ask which user's journey and
+which journey in particular you want to see. It will then plot the data from
+each sensor into a separate figure. You have the option to visualize the plots
+in a column layout, grid layout or both (default). This can be specified as command line
+arguments.
+
+To visualize the data, call:
+#+BEGIN_SRC
+python visualization.py
+#+END_SRC
+
++ =-c= or =-column= to view column layout
+  #+BEGIN_SRC
+  python visualization.py -c
+  #+END_SRC
++ =-g= or =-grid= to view grid layout
+  #+BEGIN_SRC
+  python visualization.py -g
+  #+END_SRC
+
+The script will open the generated plots in a new browser tab. You can play
+around (pan and zoom) with the graph in the grid mode (for some reason, tools are not available
+yet in the column view).
+
+Additionally the script visualization_mode.py will generate graphs that compare features that are aggregated in the features.csv. Each graph will compare a given feature between all different transport modes.
+       
+*** Windowing
+To aggregate the data into windows of a fixed size call the script windowing.py (with the optional parameter "window_size" which is the window lenght in milliseconds).
+This will read out the folder "processed_data" so make sure you have all data processed before!
+The resulting windows will be saved in the file "features.csv".
+
+    
+*** Machine Learning
+To test the accuracy of the features extracted from the data and saved in "features.csv" you can simply invoke machine.py which will split the data into test and training set and then perform ML and report the resulting accuracy.
+
+*** Features
+List of all features used (in order):
++ acc_mean (mean of the accelerator's magnitude over all axis)
++ avg_con_bt (average of connected bluetooth devices over all scans that were done within this window)
++ gyro_mean (see acc_mean)
++ max_speed
++ avg_speed
++ distance_travelled
++ mag_mean (see acc_mean)
++ acc_mixed_0 (fft magic, there's 10 features per axis, so 30 features total per sensor)
++ ...
++ acc_mixed_29
++ gyro_mixed_0
++ ...
++ gyro_mixed_29
